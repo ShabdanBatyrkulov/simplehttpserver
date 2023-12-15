@@ -20,8 +20,7 @@
 
 namespace http_server {
 
-// Maximum size of an HTTP message is limited by how much bytes
-// we can read or send via socket each time
+// Maximum size of an HTTP message.
 constexpr size_t kMaxBufferSize = 4096;
 
 struct EventData {
@@ -32,15 +31,8 @@ struct EventData {
   char buffer[kMaxBufferSize];
 };
 
-// A request handler should expect a request as argument and returns a response
 using HttpRequestHandler_t = std::function<HttpResponse(const HttpRequest&)>;
 
-// The server consists of:
-// - 1 main thread
-// - 1 listener thread that is responsible for accepting new connections
-// - Possibly many threads that process HTTP messages and communicate with
-// clients via socket.
-//   The number of workers is defined by a constant
 class HttpServer {
  public:
   explicit HttpServer(const std::string& host, std::uint16_t port);
@@ -62,8 +54,7 @@ class HttpServer {
   bool running() const { return running_; }
 
  private:
-  static constexpr int kBacklogSize = 1000;
-  static constexpr int kMaxConnections = 10000;
+  static constexpr int kBacklogSize = 10000;
   static constexpr int kMaxEvents = 10000;
   static constexpr int kThreadPoolSize = 5;
 
@@ -91,6 +82,6 @@ class HttpServer {
                            std::uint32_t events = 0, void* data = nullptr);
 };
 
-}  // namespace simple_http_server
+}  
 
 #endif  // HTTP_SERVER_H_

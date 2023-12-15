@@ -45,16 +45,13 @@ enum class HttpStatusCode {
     HttpVersionNotSupported = 505
 };
 
-// Utility functions to convert between string or integer to enum classes
+// Utility functions
 std::string to_string(HttpMethod method);
 std::string to_string(HttpVersion version);
 std::string to_string(HttpStatusCode status_code);
 HttpMethod string_to_method(const std::string& method_string);
 HttpVersion string_to_version(const std::string& version_string);
 
-// Defines the common interface of an HTTP request and HTTP response.
-// Each message will have an HTTP version, collection of header fields,
-// and message content. The collection of headers and content can be empty.
 class HttpMessageInterface {
  public:
   HttpMessageInterface() : version_(HttpVersion::HTTP_1_1) {}
@@ -93,9 +90,6 @@ class HttpMessageInterface {
   }
 };
 
-// An HttpRequest object represents a single HTTP request
-// It has a HTTP method and URI so that the server can identify
-// the corresponding resource and action
 class HttpRequest : public HttpMessageInterface {
  public:
   HttpRequest() : method_(HttpMethod::GET) {}
@@ -115,9 +109,6 @@ class HttpRequest : public HttpMessageInterface {
   std::string uri_;
 };
 
-// An HTTPResponse object represents a single HTTP response
-// The HTTP server sends an HTTP response to a client that include
-// an HTTP status code, headers, and (optional) content
 class HttpResponse : public HttpMessageInterface {
  public:
   HttpResponse() : status_code_(HttpStatusCode::Ok) {}
@@ -135,12 +126,12 @@ class HttpResponse : public HttpMessageInterface {
   HttpStatusCode status_code_;
 };
 
-// Utility functions to convert HTTP message objects to string and vice versa
+// Utility functions
 std::string to_string(const HttpRequest& request);
 std::string to_string(const HttpResponse& response, bool send_content = true);
 HttpRequest string_to_request(const std::string& request_string);
 HttpResponse string_to_response(const std::string& response_string);
 
-} // namespace http_server
+} 
 
 #endif // HTTP_MESSAGE_H_

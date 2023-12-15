@@ -4,10 +4,10 @@ server: server.o httpserver.o httpmessage.o
 server.o: server.cc
 	g++ server.cc -c
 
-httpserver.o: httpserver.cc
+httpserver.o: httpserver.cc httpserver.h
 	g++ httpserver.cc -c
 
-httpmessage.o: httpmessage.cc
+httpmessage.o: httpmessage.cc httpmessage.h
 	g++ httpmessage.cc -c
 
 clean:

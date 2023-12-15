@@ -17,6 +17,8 @@
 
 #include "httpmessage.h"
 
+#include <iostream>
+
 namespace http_server {
 
 HttpServer::HttpServer(const std::string &host, std::uint16_t port)
@@ -166,18 +168,18 @@ void HttpServer::HandleEpollEvent(int epoll_fd, EventData *data,
   if (events == EPOLLIN) {
     request = data;
     ssize_t byte_count = recv(fd, request->buffer, kMaxBufferSize, 0);
-    if (byte_count > 0) {  // we have fully received the message
+    if (byte_count > 0) {  
       response = new EventData();
       response->fd = fd;
       HandleHttpData(*request, response);
       control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLOUT, response);
       delete request;
-    } else if (byte_count == 0) {  // client has closed connection
+    } else if (byte_count == 0) { 
       control_epoll_event(epoll_fd, EPOLL_CTL_DEL, fd);
       close(fd);
       delete request;
     } else {
-      if (errno == EAGAIN || errno == EWOULDBLOCK) {  // retry
+      if (errno == EAGAIN || errno == EWOULDBLOCK) { 
         request->fd = fd;
         control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLIN, request);
       } else {  // other error
@@ -191,20 +193,20 @@ void HttpServer::HandleEpollEvent(int epoll_fd, EventData *data,
     ssize_t byte_count =
         send(fd, response->buffer + response->cursor, response->length, 0);
     if (byte_count >= 0) {
-      if (byte_count < response->length) {  // there are still bytes to write
+      if (byte_count < response->length) { 
         response->cursor += byte_count;
         response->length -= byte_count;
         control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLOUT, response);
-      } else {  // we have written the complete message
+      } else {  
         request = new EventData();
         request->fd = fd;
         control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLIN, request);
         delete response;
       }
     } else {
-      if (errno == EAGAIN || errno == EWOULDBLOCK) {  // retry
+      if (errno == EAGAIN || errno == EWOULDBLOCK) { 
         control_epoll_event(epoll_fd, EPOLL_CTL_ADD, fd, EPOLLOUT, response);
-      } else {  // other error
+      } else { 
         control_epoll_event(epoll_fd, EPOLL_CTL_DEL, fd);
         close(fd);
         delete response;
@@ -233,7 +235,6 @@ void HttpServer::HandleHttpData(const EventData &raw_request,
     http_response.SetContent(e.what());
   }
 
-  // Set response to write to client
   response_string =
       to_string(http_response, http_request.method() != HttpMethod::HEAD);
   memcpy(raw_response->buffer, response_string.c_str(), kMaxBufferSize);
@@ -241,15 +242,16 @@ void HttpServer::HandleHttpData(const EventData &raw_request,
 }
 
 HttpResponse HttpServer::HandleHttpRequest(const HttpRequest &request) {
+  // std::cerr << request.uri() << ' ' << to_string(request.method()) << std::endl;
   auto it = request_handlers_.find(request.uri());
-  if (it == request_handlers_.end()) {  // this uri is not registered
+  if (it == request_handlers_.end()) {  // no uri
     return HttpResponse(HttpStatusCode::NotFound);
   }
   auto callback_it = it->second.find(request.method());
-  if (callback_it == it->second.end()) {  // no handler for this method
+  if (callback_it == it->second.end()) {  // no method
     return HttpResponse(HttpStatusCode::MethodNotAllowed);
   }
-  return callback_it->second(request);  // call handler to process the request
+  return callback_it->second(request);
 }
 
 void HttpServer::control_epoll_event(int epoll_fd, int op, int fd,

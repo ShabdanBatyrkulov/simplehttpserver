@@ -131,7 +131,7 @@ HttpRequest string_to_request(const std::string& request_string) {
   start_line = request_string.substr(lpos, rpos - lpos);
   lpos = rpos + 2;
   rpos = request_string.find("\r\n\r\n", lpos);
-  if (rpos != std::string::npos) {  // has header
+  if (rpos != std::string::npos) {  
     header_lines = request_string.substr(lpos, rpos - lpos);
     lpos = rpos + 4;
     rpos = request_string.length();
@@ -152,14 +152,13 @@ HttpRequest string_to_request(const std::string& request_string) {
     throw std::logic_error("HTTP version not supported");
   }
 
-  iss.clear();  // parse header fields
+  iss.clear();
   iss.str(header_lines);
   while (std::getline(iss, line)) {
     std::istringstream header_stream(line);
     std::getline(header_stream, key, ':');
     std::getline(header_stream, value);
 
-    // remove whitespaces from the two strings
     key.erase(std::remove_if(key.begin(), key.end(),
                              [](char c) { return std::isspace(c); }),
               key.end());
